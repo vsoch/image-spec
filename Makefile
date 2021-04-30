@@ -107,11 +107,11 @@ img/%.png: img/%.dot
 	dot -Tpng $^ > $@
 
 
-# When this is running in travis, it will only check the travis commit range
+# When this is running in GitHub, it will only check the commit range
 .gitvalidation:
 	@which git-validation > /dev/null 2>/dev/null || (echo "ERROR: git-validation not found. Consider 'make install.tools' target" && false)
-ifdef TRAVIS_COMMIT_RANGE
-	git-validation -q -run DCO,short-subject,dangling-whitespace
+ifdef GITHUB_SHA
+	git-validation -q -run DCO,short-subject,dangling-whitespace -range $(GITHUB_SHA)..HEAD
 else
 	git-validation -v -run DCO,short-subject,dangling-whitespace -range $(EPOCH_TEST_COMMIT)..HEAD
 endif

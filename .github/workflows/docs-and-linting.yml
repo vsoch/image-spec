@@ -1,0 +1,36 @@
+name: Render and Lint Documentation
+
+on:
+  pull_request:
+    branches_ignore: []
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: ['1.10', '1.11', '1.12']
+
+    name: Documentation and Linting
+    steps:
+                              # commit for v1 release
+      - uses: actions/setup-go@0caeaed6fd66a828038c2da3c0f662a42862658f
+        with:
+          go-version: ${{ matrix.go }}
+
+      - uses: actions/checkout@v2
+      - name: Render and Lint
+        run: |
+          export GOPATH=$HOME/gopath
+          export PATH=$HOME/gopath/bin:$PATH
+          docker pull quay.io/oci/pandoc:1.17.0.3-2.fc25.x86_64
+          make install.tools
+          go get -u github.com/alecthomas/gometalinter
+          gometalinter --install
+          go get -t -d ./...
+          make
+          make .gitvalidation
+          make lint
+          make check-license
+          make test
+          make docs
